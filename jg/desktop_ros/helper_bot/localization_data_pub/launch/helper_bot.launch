@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <!-- Initial Pose and Goal Publisher -->
+  <!-- Publish: /initialpose, /move_base_simple/goal -->
+<!--
+  <node pkg="rviz" type="rviz" name="rviz" args="-d /home/automaticaddison/catkin_ws/src/jetson_nano_bot/navigation_data_pub/maps/floorplan4.rviz">
+  </node> 
+-->
+<node pkg="rviz" type="rviz" name="rviz">
+  </node> 
+
+  <!-- Subscribe: /initialpose, /move_base_simple/goal -->
+  <!-- Publish: /initial_2d, /goal_2d --> 
+
+<!--  <node pkg="localization_data_pub" type="rviz_click_to_2d" name="rviz_click_to_2d">
+  </node>
+-->
+
+
+  <!-- Map File -->
+<!--  <arg name="map_file" default="$(find navigation_data_pub)/maps/test_map.yaml"/> -->
+  <arg name="map_file" default="/home/ubuntu/iot3_ros_ws/maps/test.yaml"/>
+	
+  <!-- Map Server -->
+  <!-- Publish: /map, /map_metadata -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" />
+
+  <!-- Add AMCL example for differential drive robots for Localization -->
+  <!-- Subscribe: /scan, /tf, /initialpose, /map -->
+  <!-- Publish: /amcl_pose. /particlecloud, /tf -->
+  <!--<include file="$(find amcl)/examples/amcl_diff.launch"/>-->
+  <include file="/home/ubuntu/iot3_ros_ws/src/navigation/amcl/examples/amcl_diff.launch"/>
+  <!--<include file="/home/ubuntu/iot3_ros_ws/src/navigation/amcl/examples/amcl_diff.launch"/>-->
+
+  <!-- Move Base Node -->
+  <!-- Subscribe: /move_base_simple/goal -->
+  <!-- Publish: /cmd_vel -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find localization_data_pub)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find localization_data_pub)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find localization_data_pub)/param/local_costmap_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find localization_data_pub)/param/global_costmap_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find localization_data_pub)/param/base_local_planner_params.yaml" command="load" />
+  </node>
+
+</launch>
